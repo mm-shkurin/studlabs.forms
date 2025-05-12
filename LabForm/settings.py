@@ -19,8 +19,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost","127.0.0.1","mm-shkurin-absoluteomsk-api-7aca.twc1.net","absoluteomsk.ru" ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Разрешить запросы с этого домена
-    "http://127.0.0.1:8000",  # Разрешить запросы с этого домена (если фронтенд и бэкенд на одном сервере)
+    "http://localhost:3000", 
+    "http://127.0.0.1:8000", 
     "https://mm-shkurin-absoluteomsk-api-7aca.twc1.net",
     "https://absoluteomsk.ru"
 ]
