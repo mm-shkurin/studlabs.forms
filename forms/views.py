@@ -1,15 +1,11 @@
-from rest_framework import generics, permissions
-from .models import Form, Response
+from .models import *
 from .serializers import *
 from .permissions import IsOwnerOrReadOnly
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from .models import Form
-from .serializers import FormCreateSerializer, FormSerializer
+
 class FormCreateView(generics.CreateAPIView):
     serializer_class = FormCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -33,6 +29,7 @@ class FormCreateView(generics.CreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
 class FormListView(generics.ListAPIView):
     serializer_class = FormSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -62,74 +59,24 @@ class FormListView(generics.ListAPIView):
         if search_query:
             queryset = queryset.filter(title__icontains=search_query)
         return queryset.prefetch_related('questions__options')
+    
 class FormDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Form.objects.all().prefetch_related('questions__options')
     serializer_class = FormSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
-    lookup_field = 'pk'  # Явно указываем поле для поиска
-
-    @swagger_auto_schema(
-        operation_summary="Получить детали формы",
-        manual_parameters=[
-            openapi.Parameter(
-                'pk', openapi.IN_PATH,
-                description="ID формы",
-                type=openapi.TYPE_STRING,
-                example="OcIiYEYl9Z"
-            )
-        ],
-        responses={
-            200: FormSerializer,
-            401: openapi.Response("Не авторизован"),
-            403: openapi.Response("Нет прав доступа"),
-            404: openapi.Response("Форма не найдена")
-        },
-        security=[{"Bearer": []}]
-    )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+    lookup_field = 'pk'
 
     @swagger_auto_schema(
         operation_summary="Полное обновление формы",
-        operation_description="Обновляет все поля формы, включая вопросы и варианты ответов",
         request_body=FormSerializer,
         responses={
             200: FormSerializer,
-            400: openapi.Response("Неверные данные"),
-            403: openapi.Response("Нет прав доступа")
-        },
-        security=[{"Bearer": []}]
+            400: "Неверные данные"
+        }
     )
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_summary="Частичное обновление формы",
-        operation_description="Обновляет только указанные поля формы",
-        request_body=FormSerializer,
-        responses={
-            200: FormSerializer,
-            400: openapi.Response("Неверные данные"),
-            403: openapi.Response("Нет прав доступа")
-        },
-        security=[{"Bearer": []}]
-    )
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_summary="Удалить форму",
-        operation_description="Удаляет форму и все связанные вопросы и ответы",
-        responses={
-            204: "Форма удалена",
-            403: "Нет прав доступа",
-            404: "Форма не найдена"
-        },
-        security=[{"Bearer": []}]
-    )
-    def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
-
+    
 class ResponseCreateView(generics.CreateAPIView):
     serializer_class = ResponseSerializer
     permission_classes = [permissions.AllowAny]

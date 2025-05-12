@@ -14,14 +14,74 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id', 'text', 'type', 'required', 'options']
         read_only_fields = ['id']
-
+        
 class FormSerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True)
-    
+    questions = QuestionSerializer(many=True, required=False)
+
     class Meta:
         model = Form
-        fields = ['id', 'title', 'description', 'owner', 'questions']
-        read_only_fields = ['id', 'owner']
+        fields = ['id', 'title', 'description', 'questions']
+        extra_kwargs = {
+            'owner': {'read_only': True},
+            'id': {'read_only': True}
+        }
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+
+        if 'questions' in validated_data:
+            questions_data = validated_data.pop('questions')
+            self.update_questions(instance, questions_data)
+
+        return instance
+
+    def update_questions(self, form, questions_data):
+        current_questions = {q.id: q for q in form.questions.all()}
+        new_ids = []
+
+        for question_data in questions_data:
+            question_id = question_data.get('id')
+            if question_id and question_id in current_questions:
+                question = current_questions[question_id]
+                question.text = question_data.get('text', question.text)
+                question.type = question_data.get('type', question.type)
+                question.required = question_data.get('required', question.required)
+                question.save()
+                self.update_options(question, question_data.get('options', []))
+                new_ids.append(question_id)
+            else:
+                new_q = self.create_question(form, question_data)
+                new_ids.append(new_q.id)
+
+        for q in form.questions.exclude(id__in=new_ids):
+            q.delete()
+
+    def update_options(self, question, options_data):
+        current_options = {o.id: o for o in question.options.all()}
+        new_ids = []
+
+        for option_data in options_data:
+            option_id = option_data.get('id')
+            if option_id and option_id in current_options:
+                option = current_options[option_id]
+                option.text = option_data.get('text', option.text)
+                option.save()
+                new_ids.append(option_id)
+            else:
+                new_opt = Option.objects.create(question=question, **option_data)
+                new_ids.append(new_opt.id)
+
+        for o in question.options.exclude(id__in=new_ids):
+            o.delete()
+
+    def create_question(self, form, question_data):
+        options_data = question_data.pop('options', [])
+        question = Question.objects.create(form=form, **question_data)
+        for option_data in options_data:
+            Option.objects.create(question=question, **option_data)
+        return question 
 
 class FormCreateSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
@@ -35,7 +95,10 @@ class FormCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         questions_data = validated_data.pop('questions')
-        form = Form.objects.create(owner=self.context['request'].user, **validated_data)
+        form = Form.objects.create(
+            owner=self.context['request'].user,
+            **validated_data
+        )
         
         for question_data in questions_data:
             options_data = question_data.pop('options', [])
@@ -45,7 +108,7 @@ class FormCreateSerializer(serializers.ModelSerializer):
                 Option.objects.create(question=question, **option_data)
         
         return form
-
+    
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
@@ -60,9 +123,6 @@ class ResponseSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'respondent']
     
     def validate(self, data):
-        """
-        Дополнительная валидация ответов
-        """
         form = data.get('form')
         answers = data.get('answers', [])
         
@@ -74,7 +134,6 @@ class ResponseSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"Не заполнены обязательные вопросы: {', '.join(str(q.id) for q in missing_questions)}"
             )
-        
         return data
     
     def create(self, validated_data):
