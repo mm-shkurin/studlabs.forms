@@ -6,7 +6,7 @@ Postman-коллекция для работы с API тестового зад�
 ---
 ## Старт
 ```bash
-git clone https://github.com/mm-shkurin/studlab.forms
+git clone https://github.com/mm-shkurin/studlabs.forms
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
