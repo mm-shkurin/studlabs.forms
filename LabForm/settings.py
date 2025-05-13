@@ -111,17 +111,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'LabForm',
-        'USER': 'admin',
-        'PASSWORD': '8913',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}'''
+
 # Internationalization
 LANGUAGE_CODE = 'ru'
 

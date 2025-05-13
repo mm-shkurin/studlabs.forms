@@ -6,5 +6,4 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LabForm.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    # "websocket": ...  # для WebSocket-подключений
 })
