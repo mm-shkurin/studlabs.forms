@@ -100,3 +100,8 @@ docker-compose up --build
 - **POST /labform/{form_id}/responses/**  
   Отправить ответ на форму.  
   *Токен не требуется*
+---
+### Swagger
+- **GET /swagger/**  
+  Открыть swagger.  
+  *Токен не требуется*
