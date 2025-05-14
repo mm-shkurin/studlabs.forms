@@ -4,7 +4,7 @@ Postman-коллекция для работы с API тестового зад�
 [Ссылка на коллекцию Postman](https://postman.co/workspace/My-Workspace~9a4584af-7291-4211-80bc-5fbe5db99042/collection/31974596-2261464e-1272-45e4-9e38-8d9443f7ca80?action=share&creator=31974596)
 
 ---
-## Старт
+## Start
 ```bash
 git clone https://github.com/mm-shkurin/studlabs.forms
 ```
@@ -30,6 +30,11 @@ python manage.py runserver #wsgi
 uvicorn LabForm.asgi:application --reload #uvicorn
 ```
 ---
+## Docker
+```bash
+docker-compose up --build
+```
+---
 ## Функциональность
 - Регистрация и подтверждение email
 - Авторизация через JWT (access/refresh токены)
@@ -42,7 +47,7 @@ uvicorn LabForm.asgi:application --reload #uvicorn
 
 ## Эндпоинты API
 
-### Авторизация (Auth)
+### Auth
 - **POST /user/register/**  
   Регистрация нового пользователя.  
   *Токен не требуется*
@@ -57,14 +62,14 @@ uvicorn LabForm.asgi:application --reload #uvicorn
 
 ---
 
-### Профиль (User)
+### User
 - **GET /user/me/**  
   Получение профиля пользователя и краткой статистики.  
   *Требуется токен*
 
 ---
 
-### Формы (Form)
+### Form
 - **POST /labform/**  
   Создание новой формы.  
   *Требуется токен*
@@ -91,7 +96,7 @@ uvicorn LabForm.asgi:application --reload #uvicorn
 
 ---
 
-### Ответы (Respons)
+### Respons
 - **POST /labform/{form_id}/responses/**  
   Отправить ответ на форму.  
   *Токен не требуется*
