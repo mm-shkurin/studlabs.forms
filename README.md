@@ -7,12 +7,26 @@ Postman-коллекция для работы с API тестового зад�
 ## Старт
 ```bash
 git clone https://github.com/mm-shkurin/studlabs.forms
+```
+```bash
 python -m venv venv
+```
+```bash
 venv\Scripts\activate
+```
+```bash
 pip install -r requirements.txt
+```
+```bash
 python manage.py makemigrations
+```
+```bash
 python manage.py migrate
+```
+```bash
 python manage.py runserver #wsgi
+```
+```bash
 uvicorn LabForm.asgi:application --reload #uvicorn
 ```
 ---
